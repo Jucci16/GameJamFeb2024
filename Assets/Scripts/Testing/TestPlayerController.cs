@@ -23,6 +23,7 @@ public class TestPlayerController : NetworkBehaviour
 
     private void OnEnable()
     {
+        _inputAction = new TestPlayerInputActions();
         _moveInputAction = _inputAction.Player.Move;
         _fireInputAction = _inputAction.Player.Fire;
         _lookInputAction = _inputAction.Player.Look;
@@ -45,18 +46,22 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Awake()
     {
-        _inputAction = new TestPlayerInputActions();
+        if (IsOwner) _inputAction = new TestPlayerInputActions();
     }
 
-    // Start is called before the first frame update
+
     void Start()
     {
-        //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
-
         _rigidBody = GetComponent<Rigidbody>();
         if (!IsOwner) _camera.enabled = false;
-        //_rigidBody.freezeRotation = true;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            _inputAction = new TestPlayerInputActions();
+        }
     }
 
     // Update is called once per frame
