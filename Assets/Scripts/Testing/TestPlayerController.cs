@@ -13,6 +13,9 @@ public class TestPlayerController : NetworkBehaviour
     [SerializeField]
     private Camera _camera;
 
+    [SerializeField]
+    private PlayerVisual _playerVisual;
+
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
@@ -54,6 +57,8 @@ public class TestPlayerController : NetworkBehaviour
     {
         _rigidBody = GetComponent<Rigidbody>();
         if (!IsOwner) _camera.enabled = false;
+        var playerData = LobbyManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _playerVisual.SetPlayerColor(LobbyManager.Instance.GetPlayerColor(playerData.ColorId));
     }
 
     public override void OnNetworkSpawn()
