@@ -1,0 +1,67 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CharacterSelect : MonoBehaviour
+{
+    [SerializeField]
+    private int _playerIndex;
+
+    [SerializeField]
+    private GameObject _readyTextGameObject;
+
+    private void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        LobbyManager.Instance.OnPlayerDataListChanged += LobbyManager_OnPlayerDataListChanged;
+        CharacterSelectReady.Instance.OnReadyChanged += CharacterSelectReady_OnReadyChanged;
+        UpdatePlayer();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    private void UpdatePlayer()
+    {
+        if (LobbyManager.Instance.IsPlayerIndexConnected(_playerIndex))
+        {
+            Show();
+            var playerData = LobbyManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
+            _readyTextGameObject.SetActive(CharacterSelectReady.Instance.IsPlayerReady(playerData.ClientId));
+        } else
+        {
+            Hide();
+        }
+
+    }
+
+    /// <summary>
+    /// When player data changes. Can be when a player joins/leaves or modifies their own character.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    private void LobbyManager_OnPlayerDataListChanged(object sender, EventArgs e)
+    {
+        UpdatePlayer();
+    }
+
+    private void CharacterSelectReady_OnReadyChanged(object sender, EventArgs e)
+    {
+        UpdatePlayer();
+    }
+}
