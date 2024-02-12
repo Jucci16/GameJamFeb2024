@@ -54,6 +54,7 @@ public class CharacterSelectReady : NetworkBehaviour
 
         if (allClientsReady)
         {
+            UnityLobbyManager.Instance.DeleteLobby();
             LevelLoader.LoadNetwork(LevelEnum.MultiplayTestScene);
         }
     }

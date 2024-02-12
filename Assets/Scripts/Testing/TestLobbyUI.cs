@@ -16,13 +16,13 @@ public class TestLobbyUI : MonoBehaviour
     {
         _createGameBtn.onClick.AddListener(() =>
         { 
-            LobbyManager.Instance.StartHost();
+            MultiplayerManager.Instance.StartHost();
             LevelLoader.LoadNetwork(LevelEnum.CharacterSelectScene);
         });
 
         _joinGameBtn.onClick.AddListener(() =>
         {
-            LobbyManager.Instance.StartClient();
+            MultiplayerManager.Instance.StartClient();
             LevelLoader.LoadNetwork(LevelEnum.CharacterSelectScene);
         });
     }
