@@ -14,8 +14,11 @@ public class MainMenuUI : MonoBehaviour
         if (NetworkManager.Singleton is not null)
             Destroy(NetworkManager.Singleton.gameObject);
 
-        if (LobbyManager.Instance is not null)
-            Destroy(LobbyManager.Instance.gameObject);
+        if (MultiplayerManager.Instance is not null)
+            Destroy(MultiplayerManager.Instance.gameObject);
+
+        if (UnityLobbyManager.Instance is not null)
+            Destroy(UnityLobbyManager.Instance.gameObject);
 
         _lobbyButton.onClick.AddListener(OpenLobbyScreen);
     }

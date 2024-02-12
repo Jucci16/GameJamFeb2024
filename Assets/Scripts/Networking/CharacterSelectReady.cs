@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -54,6 +55,7 @@ public class CharacterSelectReady : NetworkBehaviour
 
         if (allClientsReady)
         {
+            Task.Run(async () => await UnityLobbyManager.Instance.DeleteLobby());
             LevelLoader.LoadNetwork(LevelEnum.MultiplayTestScene);
         }
     }

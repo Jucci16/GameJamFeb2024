@@ -7,8 +7,8 @@ public class ConnectingToServerUI : MonoBehaviour
 {
     private void Start()
     {
-        LobbyManager.Instance.OnTryingToJoinGame += LobbyManager_OnTryingToJoinGame;
-        LobbyManager.Instance.OnFailedToJoinGame += LobbyManager_OnFailedToJoinGame;
+        MultiplayerManager.Instance.OnTryingToJoinGame += LobbyManager_OnTryingToJoinGame;
+        MultiplayerManager.Instance.OnFailedToJoinGame += LobbyManager_OnFailedToJoinGame;
         Hide();
     }
 
@@ -34,7 +34,7 @@ public class ConnectingToServerUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        LobbyManager.Instance.OnTryingToJoinGame -= LobbyManager_OnTryingToJoinGame;
-        LobbyManager.Instance.OnFailedToJoinGame -= LobbyManager_OnFailedToJoinGame;
+        MultiplayerManager.Instance.OnTryingToJoinGame -= LobbyManager_OnTryingToJoinGame;
+        MultiplayerManager.Instance.OnFailedToJoinGame -= LobbyManager_OnFailedToJoinGame;
     }
 }

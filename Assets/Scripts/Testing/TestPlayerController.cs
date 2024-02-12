@@ -57,8 +57,8 @@ public class TestPlayerController : NetworkBehaviour
     {
         _rigidBody = GetComponent<Rigidbody>();
         if (!IsOwner) _camera.enabled = false;
-        var playerData = LobbyManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _playerVisual.SetPlayerColor(LobbyManager.Instance.GetPlayerColor(playerData.ColorId));
+        var playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
     }
 
     public override void OnNetworkSpawn()

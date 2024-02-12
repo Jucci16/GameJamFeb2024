@@ -12,8 +12,8 @@ public class CharacterSelectColorSingleUI : MonoBehaviour
 
     private void Start()
     {
-        LobbyManager.Instance.OnPlayerDataListChanged += LobbyManager_OnPlayerDataListChanged;
-        _image.color = LobbyManager.Instance.GetPlayerColor(_colorId);
+        MultiplayerManager.Instance.OnPlayerDataListChanged += LobbyManager_OnPlayerDataListChanged;
+        _image.color = MultiplayerManager.Instance.GetPlayerColor(_colorId);
         UpdateIsSelected();
     }
 
@@ -21,13 +21,13 @@ public class CharacterSelectColorSingleUI : MonoBehaviour
     {
         GetComponent<Button>().onClick.AddListener(() =>
         {
-            LobbyManager.Instance.ChangePlayerColor(_colorId);
+            MultiplayerManager.Instance.ChangePlayerColor(_colorId);
         });
     }
 
     private void UpdateIsSelected()
     {
-        _selectedImageGameObjected.SetActive(LobbyManager.Instance.GetPlayerData().ColorId == _colorId);
+        _selectedImageGameObjected.SetActive(MultiplayerManager.Instance.GetPlayerData().ColorId == _colorId);
     }
 
     private void LobbyManager_OnPlayerDataListChanged(object sender, EventArgs e)

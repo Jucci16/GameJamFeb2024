@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ public class CharacterSelect : MonoBehaviour
     private PlayerVisual _playerVisual;
 
     [SerializeField] private Button _kickButton;
+    [SerializeField] private TextMeshPro _playerNameText;
 
     private void Show()
     {
@@ -30,23 +32,24 @@ public class CharacterSelect : MonoBehaviour
 
     private void Awake()
     {
-        _kickButton.onClick.AddListener(() => 
+        _kickButton.onClick.AddListener(async () => 
         {
-            var playerData = LobbyManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
-            LobbyManager.Instance.KickPlayer(playerData.ClientId);
+            var playerData = MultiplayerManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
+            await UnityLobbyManager.Instance.KickPlayer(playerData.PlayerId.ToString());
+            MultiplayerManager.Instance.KickPlayer(playerData.ClientId);
         });
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        LobbyManager.Instance.OnPlayerDataListChanged += LobbyManager_OnPlayerDataListChanged;
+        MultiplayerManager.Instance.OnPlayerDataListChanged += LobbyManager_OnPlayerDataListChanged;
         CharacterSelectReady.Instance.OnReadyChanged += CharacterSelectReady_OnReadyChanged;
         bool showKickButton = NetworkManager.Singleton.IsServer;
 
-        if (showKickButton && LobbyManager.Instance.IsPlayerIndexConnected(_playerIndex))
+        if (showKickButton && MultiplayerManager.Instance.IsPlayerIndexConnected(_playerIndex))
         {
-            var playerData = LobbyManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
+            var playerData = MultiplayerManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
             showKickButton = playerData.ClientId != NetworkManager.Singleton.LocalClientId;
         }
 
@@ -63,13 +66,13 @@ public class CharacterSelect : MonoBehaviour
 
     private void UpdatePlayer()
     {
-        if (LobbyManager.Instance.IsPlayerIndexConnected(_playerIndex))
+        if (MultiplayerManager.Instance.IsPlayerIndexConnected(_playerIndex))
         {
             Show();
-            var playerData = LobbyManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
-            _playerVisual.SetPlayerColor(LobbyManager.Instance.GetPlayerColor(playerData.ColorId));
+            var playerData = MultiplayerManager.Instance.GetPlayerDataFromPlayerIndex(_playerIndex);
+            _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
             _readyTextGameObject.SetActive(CharacterSelectReady.Instance.IsPlayerReady(playerData.ClientId));
-
+            _playerNameText.text = playerData.PlayerName.ToString();
         } else
         {
             Hide();

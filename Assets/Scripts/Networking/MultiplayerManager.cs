@@ -1,21 +1,24 @@
+using Assets.Scripts.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LobbyManager : NetworkBehaviour
+public class MultiplayerManager : NetworkBehaviour
 {
-    public static LobbyManager Instance { get; private set; }
+    public static MultiplayerManager Instance { get; private set; }
 
     [SerializeField]
     private List<Color> _playerColors;
 
     private NetworkVariable<LobbyState> _lobbyState = new NetworkVariable<LobbyState>(LobbyState.CharacterSelect);
     private NetworkList<PlayerData> _playerDataList;
+    private string _playerName;
 
-    private const int MAX_PLAYER_COUNT = 5;
+    public const int MaxPlayerCount = 5;
 
     public event EventHandler OnTryingToJoinGame;
     public event EventHandler OnFailedToJoinGame;
@@ -27,9 +30,20 @@ public class LobbyManager : NetworkBehaviour
         DontDestroyOnLoad(gameObject);
         _playerDataList = new NetworkList<PlayerData>();
         _playerDataList.OnListChanged += PlayerDataList_OnListChanged;
+
+        _playerName = PlayerPrefs.GetString(PlayerPrefConstants.PlayerName, "PlayerName" + UnityEngine.Random.Range(100, 10_000));
     }
 
+    public string GetPlayerName()
+    {
+        return _playerName;
+    }
 
+    public void SetPlayerName(string playerName)
+    {
+        _playerName = playerName;
+        PlayerPrefs.SetString(PlayerPrefConstants.PlayerName, _playerName);
+    }
 
     public void StartHost()
     {
@@ -46,9 +60,12 @@ public class LobbyManager : NetworkBehaviour
         OnTryingToJoinGame.Invoke(this, EventArgs.Empty);
 
         NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnCientDisconnectCallback;
+        NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectedCallback;
 
         NetworkManager.Singleton.StartClient();
     }
+
+
 
     public bool IsPlayerIndexConnected(int playerIndex)
     {
@@ -100,6 +117,32 @@ public class LobbyManager : NetworkBehaviour
         OnFailedToJoinGame?.Invoke(this, EventArgs.Empty);
     }
 
+    private void NetworkManager_Client_OnClientConnectedCallback(ulong clientId)
+    {
+        SetPlayerNameServerRpc(GetPlayerName());
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+    }
+
+    [ServerRpc(RequireOwnership =false)]
+    private void SetPlayerNameServerRpc(string playerName, ServerRpcParams serverRpcParams = default)
+    {
+        var playerDataIndex = GetPlayerIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        var playerData = _playerDataList[playerDataIndex];
+        playerData.PlayerName = playerName;
+
+        _playerDataList[playerDataIndex] = playerData;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetPlayerIdServerRpc(string playerId, ServerRpcParams serverRpcParams = default)
+    {
+        var playerDataIndex = GetPlayerIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        var playerData = _playerDataList[playerDataIndex];
+        playerData.PlayerId = playerId;
+
+        _playerDataList[playerDataIndex] = playerData;
+    }
+
     /// <summary>
     /// Client disconnected (Quit and went back to main menu).
     /// </summary>
@@ -131,7 +174,7 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
-        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_PLAYER_COUNT) 
+        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MaxPlayerCount) 
         {
             response.Approved = false;
             response.Reason = "Game is full.";
@@ -152,6 +195,8 @@ public class LobbyManager : NetworkBehaviour
             ClientId = clientId,
             ColorId = GetFirstUnusedColorId(),
         });
+        SetPlayerNameServerRpc(GetPlayerName());
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
     }
 
     /// <summary>
