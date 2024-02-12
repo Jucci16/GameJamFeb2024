@@ -18,8 +18,9 @@ public class CharacterSelectUI : MonoBehaviour
 
     private void Awake()
     {
-        _mainMenuButton.onClick.AddListener(() =>
+        _mainMenuButton.onClick.AddListener(async () =>
         {
+            await UnityLobbyManager.Instance.LeaveLobby();
             NetworkManager.Singleton.Shutdown();
             LevelLoader.Load(LevelEnum.MainMenuScene);
         });

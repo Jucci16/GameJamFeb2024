@@ -55,6 +55,8 @@ public class LobbyMessageUI : MonoBehaviour
         MultiplayerManager.Instance.OnFailedToJoinGame -= MultiplayerManager_OnFailedToJoinGame;
         UnityLobbyManager.Instance.OnCreateLobbyStarted -= UnityLobbyManager_OnCreateLobbyStarted;
         UnityLobbyManager.Instance.OnCreateLobbyFailed -= UnityLobbyManager_OnCreateLobbyFailed;
+        UnityLobbyManager.Instance.OnJoinStarted += UnityLobbyManager_OnJoinLobbyStarted;
+        UnityLobbyManager.Instance.OnJoinFailed += UnityLobbyManager_OnJoinLobbyFailed;
     }
 
     private void UnityLobbyManager_OnCreateLobbyStarted(object sender, EventArgs e)
