@@ -218,7 +218,7 @@ public class UnityLobbyManager : MonoBehaviour
         try
         {
             _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
-            var joinAllocation = await JoinRelay(lobbyCode);
+            var joinAllocation = await JoinRelay(_joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             MultiplayerManager.Instance.StartClient();
