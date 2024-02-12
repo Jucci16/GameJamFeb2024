@@ -33,5 +33,6 @@ public class MultiplayTestSceneManager : NetworkBehaviour
     private void Awake()
     {
         Instance = this;
+        //MusicPlayer.Instance.ChangeSong()
     }
 }
