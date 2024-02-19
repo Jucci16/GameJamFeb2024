@@ -16,6 +16,9 @@ public class TestPlayerController : NetworkBehaviour
     [SerializeField]
     private PlayerVisual _playerVisual;
 
+    [SerializeField]
+    private GameObject _projectileObject; 
+
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
@@ -34,7 +37,7 @@ public class TestPlayerController : NetworkBehaviour
         _moveInputAction.Enable();
         _fireInputAction.Enable();
         _lookInputAction.Enable();
-
+ 
         _fireInputAction.performed += Fire;
     }
 
@@ -103,6 +106,15 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        Debug.Log("Fired!!!");
+        var playerHeadObject = _playerVisual.transform.GetChild(1).gameObject;
+
+        var thisObjectHeight = transform.position.y;
+        var playerHeadObjectHeight = playerHeadObject.transform.position.y;
+        var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.x;
+        var cannonHeight = playerHeadObjectHeight - thisObjectHeight;
+        
+        var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth / 2);
+
+        GameObject newProjectile = Instantiate(_projectileObject, new Vector3(transform.position.x, cannonHeight, transform.position.z) + forwardOffset, transform.rotation);
     }
 }
