@@ -234,6 +234,8 @@ MonoBehaviour:
   _playerVisual: {fileID: 6861101996403396032}
   _projectilePrefab: {fileID: 3478778738033135230, guid: 89b4a03e7fabdaf4fae9da0ba3201104,
     type: 3}
+  _projectileExplosionPrefab: {fileID: 2976218027330178980, guid: 9d7a6dfcab2125144a8228830bab7d9b,
+    type: 3}
 --- !u!54 &5011328581216544954
 Rigidbody:
   m_ObjectHideFlags: 0

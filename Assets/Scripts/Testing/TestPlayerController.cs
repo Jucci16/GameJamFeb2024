@@ -19,6 +19,9 @@ public class TestPlayerController : NetworkBehaviour
     [SerializeField]
     private GameObject _projectilePrefab; 
 
+    [SerializeField]
+    private GameObject _projectileExplosionPrefab; 
+
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
@@ -110,11 +113,14 @@ public class TestPlayerController : NetworkBehaviour
 
         var thisObjectHeight = transform.position.y;
         var playerHeadObjectHeight = playerHeadObject.transform.position.y;
-        var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.x;
+        var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.z;
         var cannonHeight = playerHeadObjectHeight - thisObjectHeight;
         
-        var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth / 2);
+        var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
+        var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
+        var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
 
-        GameObject newProjectile = Instantiate(_projectilePrefab, new Vector3(transform.position.x, cannonHeight, transform.position.z) + forwardOffset, transform.rotation);
+        Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
+        Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
     }
 }
