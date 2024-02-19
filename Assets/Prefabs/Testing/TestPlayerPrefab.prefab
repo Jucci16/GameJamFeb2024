@@ -232,7 +232,7 @@ MonoBehaviour:
   _lookSpeed: 300
   _camera: {fileID: 3748868714589906337}
   _playerVisual: {fileID: 6861101996403396032}
-  _projectileObject: {fileID: 3478778738033135230, guid: 89b4a03e7fabdaf4fae9da0ba3201104,
+  _projectilePrefab: {fileID: 3478778738033135230, guid: 89b4a03e7fabdaf4fae9da0ba3201104,
     type: 3}
 --- !u!54 &5011328581216544954
 Rigidbody:

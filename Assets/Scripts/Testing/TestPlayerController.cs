@@ -17,7 +17,7 @@ public class TestPlayerController : NetworkBehaviour
     private PlayerVisual _playerVisual;
 
     [SerializeField]
-    private GameObject _projectileObject; 
+    private GameObject _projectilePrefab; 
 
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
@@ -115,6 +115,6 @@ public class TestPlayerController : NetworkBehaviour
         
         var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth / 2);
 
-        GameObject newProjectile = Instantiate(_projectileObject, new Vector3(transform.position.x, cannonHeight, transform.position.z) + forwardOffset, transform.rotation);
+        GameObject newProjectile = Instantiate(_projectilePrefab, new Vector3(transform.position.x, cannonHeight, transform.position.z) + forwardOffset, transform.rotation);
     }
 }
