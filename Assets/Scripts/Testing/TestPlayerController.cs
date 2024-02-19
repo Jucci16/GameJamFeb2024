@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -27,6 +28,7 @@ public class TestPlayerController : NetworkBehaviour
     private InputAction _fireInputAction;
     private InputAction _lookInputAction;
     private Rigidbody _rigidBody;
+    private AudioSource _movementAudioSource;
 
     private float _yRotation;
 
@@ -62,6 +64,7 @@ public class TestPlayerController : NetworkBehaviour
     void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
+        _movementAudioSource = GetComponent<AudioSource>();
         if (!IsOwner) _camera.enabled = false;
         var playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
         _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
@@ -81,6 +84,7 @@ public class TestPlayerController : NetworkBehaviour
         if (IsOwner)
         {
             Look();
+            MovementSoundEffect();
         }
     }
 
@@ -97,6 +101,17 @@ public class TestPlayerController : NetworkBehaviour
         var movement = _moveInputAction.ReadValue<Vector2>();
         var direction = transform.forward * movement.y + transform.right * movement.x;
         _rigidBody.AddForce(direction.normalized * _moveSpeed, ForceMode.Force);
+    }
+
+    private void MovementSoundEffect() {
+        Debug.Log(_rigidBody.velocity);
+
+        bool isMoving = Math.Abs(_rigidBody.velocity.x) > 0.5 || Math.Abs(_rigidBody.velocity.z) > 0.5;
+        if(isMoving && !_movementAudioSource.isPlaying) {
+            _movementAudioSource.Play(0);
+        } else if(!isMoving && _movementAudioSource.isPlaying) {
+            _movementAudioSource.Stop();
+        }
     }
 
     private void Look()
