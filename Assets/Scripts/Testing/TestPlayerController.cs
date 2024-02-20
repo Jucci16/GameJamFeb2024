@@ -12,6 +12,9 @@ public class TestPlayerController : NetworkBehaviour
     private float _lookSpeed = 300.0f;
 
     [SerializeField]
+    private float _fireRecoilForce = 15.0f;
+
+    [SerializeField]
     private Camera _camera;
 
     [SerializeField]
@@ -29,6 +32,7 @@ public class TestPlayerController : NetworkBehaviour
     private InputAction _lookInputAction;
     private Rigidbody _rigidBody;
     private AudioSource _movementAudioSource;
+    private AudioSource _missingProjectileAudioSource;
 
     private float _yRotation;
 
@@ -64,7 +68,9 @@ public class TestPlayerController : NetworkBehaviour
     void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
-        _movementAudioSource = GetComponent<AudioSource>();
+        var audioSources = GetComponents<AudioSource>();
+        _movementAudioSource = audioSources[0];
+        _missingProjectileAudioSource = audioSources[1];
         if (!IsOwner) _camera.enabled = false;
         var playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
         _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
@@ -124,18 +130,30 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        var playerHeadObject = _playerVisual.transform.GetChild(1).gameObject;
+        if(!MatchUIManager.instance.isReloading) {
+            // Add the projectile GameObject and the explosion
+            var playerHeadObject = _playerVisual.transform.GetChild(1).gameObject;
 
-        var thisObjectHeight = transform.position.y;
-        var playerHeadObjectHeight = playerHeadObject.transform.position.y;
-        var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.z;
-        var cannonHeight = playerHeadObjectHeight - thisObjectHeight;
-        
-        var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
-        var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
-        var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+            var thisObjectHeight = transform.position.y;
+            var playerHeadObjectHeight = playerHeadObject.transform.position.y;
+            var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.z;
+            var cannonHeight = playerHeadObjectHeight - thisObjectHeight;
+            
+            var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
+            var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
+            var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
 
-        Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
-        Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+            Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
+            Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+
+            // Add recoil to the tank
+            var direction = transform.forward * -1;
+            _rigidBody.AddForce(direction.normalized * _fireRecoilForce, ForceMode.Impulse);
+
+            // Update game ui to display "reloading" state
+            MatchUIManager.instance.StartReload();
+        } else {
+            _missingProjectileAudioSource.Play(0);
+        }
     }
 }
