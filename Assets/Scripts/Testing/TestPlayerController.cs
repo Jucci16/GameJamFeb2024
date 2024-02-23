@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class TestPlayerController : NetworkBehaviour
 {
+    private const int playerHeadIndex = 0;
+
     [SerializeField]
     private float _moveSpeed = 300.0f;
 
@@ -110,8 +112,6 @@ public class TestPlayerController : NetworkBehaviour
     }
 
     private void MovementSoundEffect() {
-        Debug.Log(_rigidBody.velocity);
-
         bool isMoving = Math.Abs(_rigidBody.velocity.x) > 0.5 || Math.Abs(_rigidBody.velocity.z) > 0.5;
         if(isMoving && !_movementAudioSource.isPlaying) {
             _movementAudioSource.Play(0);
@@ -132,12 +132,13 @@ public class TestPlayerController : NetworkBehaviour
     {
         if(!MatchUIManager.instance.isReloading) {
             // Add the projectile GameObject and the explosion
-            var playerHeadObject = _playerVisual.transform.GetChild(1).gameObject;
+            var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
 
             var thisObjectHeight = transform.position.y;
-            var playerHeadObjectHeight = playerHeadObject.transform.position.y;
-            var playerHeadObjectWidth = playerHeadObject.GetComponent<Renderer>().bounds.size.z;
-            var cannonHeight = playerHeadObjectHeight - thisObjectHeight;
+            var playerHeadObjectSize = playerHeadObject.GetComponent<Renderer>().bounds.size;
+            var playerHeadObjectHeightCenter = playerHeadObject.transform.position.y + (playerHeadObjectSize.y * 0.45f); // 0.45 is exact location of cannon in head
+            var playerHeadObjectWidth = playerHeadObjectSize.z;
+            var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
             
             var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
             var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);

@@ -12,6 +12,8 @@ public class ShellProjectile : MonoBehaviour
     void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
+        // Automatically remove GameObject after some time.
+        Destroy(gameObject, 3);
     }
 
     private void FixedUpdate()
