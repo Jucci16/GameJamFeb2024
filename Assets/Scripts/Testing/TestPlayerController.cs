@@ -6,9 +6,11 @@ using UnityEngine.InputSystem;
 public class TestPlayerController : NetworkBehaviour
 {
     private const int playerHeadIndex = 0;
+    private const int playerShellIndex = 1;
+    private const int playerTreadsIndex = 2;
 
     [SerializeField]
-    private float _moveSpeed = 300.0f;
+    private float _moveSpeed = 50.0f;
 
     [SerializeField]
     private float _lookSpeed = 300.0f;
@@ -35,6 +37,7 @@ public class TestPlayerController : NetworkBehaviour
     private Rigidbody _rigidBody;
     private AudioSource _movementAudioSource;
     private AudioSource _missingProjectileAudioSource;
+    private float _currentBodyRotation = 0;
 
     private float _yRotation;
 
@@ -104,10 +107,34 @@ public class TestPlayerController : NetworkBehaviour
         }
     }
 
+    private float GetYRotFromVec(Vector2 v1, Vector2 v2)
+    {
+        Debug.Log("Mathf.Atan2("+v1.x+" - "+v2.x+", "+v1.y+" - "+v2.y+"): "+Mathf.Atan2(v1.x - v2.x, v1.y - v2.y));
+        Debug.Log("Mathf.Atan2("+(v1.x - v2.x)+", "+(v1.y - v2.y)+"): "+Mathf.Atan2(v1.x - v2.x, v1.y - v2.y));
+       float _r = Mathf.Atan2(v1.x - v2.x, v1.y - v2.y);
+       float _d = (_r / Mathf.PI) * 180 -90;
+     
+      return _d;
+     
+    }
+
     private void Movement()
     {
         var movement = _moveInputAction.ReadValue<Vector2>();
         var direction = transform.forward * movement.y + transform.right * movement.x;
+
+        // Rotate tank body on movement
+        if(Math.Abs(movement.y) > 0.1f || Math.Abs(movement.x) > 0.1f) {
+            _currentBodyRotation = GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z));
+        }
+        var playerShellObject = _playerVisual.transform.GetChild(playerShellIndex).gameObject;
+        var playerTreadsObject = _playerVisual.transform.GetChild(playerTreadsIndex).gameObject;
+
+        Vector3 to = new Vector3(playerShellObject.transform.eulerAngles.x, _currentBodyRotation, playerShellObject.transform.eulerAngles.z);
+        playerShellObject.transform.rotation = Quaternion.Euler(playerShellObject.transform.eulerAngles.x, _currentBodyRotation, playerShellObject.transform.eulerAngles.z);
+        playerTreadsObject.transform.rotation = Quaternion.Euler(playerTreadsObject.transform.eulerAngles.x, _currentBodyRotation, playerTreadsObject.transform.eulerAngles.z);
+
+        // Move object
         _rigidBody.AddForce(direction.normalized * _moveSpeed, ForceMode.Force);
     }
 
