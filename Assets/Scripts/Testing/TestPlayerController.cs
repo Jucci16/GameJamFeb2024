@@ -37,7 +37,9 @@ public class TestPlayerController : NetworkBehaviour
     private Rigidbody _rigidBody;
     private AudioSource _movementAudioSource;
     private AudioSource _missingProjectileAudioSource;
-    private float _currentBodyRotation = 0;
+    private float _currentBodyRotation = 0f;
+    private Vector2 _lastMovementInput;
+    private float _bodyRotationProgress = 1.0f;
 
     private float _yRotation;
 
@@ -107,35 +109,64 @@ public class TestPlayerController : NetworkBehaviour
         }
     }
 
-    private float GetYRotFromVec(Vector2 v1, Vector2 v2)
-    {
-        Debug.Log("Mathf.Atan2("+v1.x+" - "+v2.x+", "+v1.y+" - "+v2.y+"): "+Mathf.Atan2(v1.x - v2.x, v1.y - v2.y));
-        Debug.Log("Mathf.Atan2("+(v1.x - v2.x)+", "+(v1.y - v2.y)+"): "+Mathf.Atan2(v1.x - v2.x, v1.y - v2.y));
-       float _r = Mathf.Atan2(v1.x - v2.x, v1.y - v2.y);
-       float _d = (_r / Mathf.PI) * 180 -90;
-     
-      return _d;
-     
-    }
-
     private void Movement()
     {
         var movement = _moveInputAction.ReadValue<Vector2>();
         var direction = transform.forward * movement.y + transform.right * movement.x;
 
-        // Rotate tank body on movement
-        if(Math.Abs(movement.y) > 0.1f || Math.Abs(movement.x) > 0.1f) {
-            _currentBodyRotation = GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z));
-        }
-        var playerShellObject = _playerVisual.transform.GetChild(playerShellIndex).gameObject;
-        var playerTreadsObject = _playerVisual.transform.GetChild(playerTreadsIndex).gameObject;
-
-        Vector3 to = new Vector3(playerShellObject.transform.eulerAngles.x, _currentBodyRotation, playerShellObject.transform.eulerAngles.z);
-        playerShellObject.transform.rotation = Quaternion.Euler(playerShellObject.transform.eulerAngles.x, _currentBodyRotation, playerShellObject.transform.eulerAngles.z);
-        playerTreadsObject.transform.rotation = Quaternion.Euler(playerTreadsObject.transform.eulerAngles.x, _currentBodyRotation, playerTreadsObject.transform.eulerAngles.z);
+        // Rotate bottom half of tank
+        RotateTankBody(movement, direction);
 
         // Move object
         _rigidBody.AddForce(direction.normalized * _moveSpeed, ForceMode.Force);
+    }
+
+    private void RotateTankBody(Vector2 movementInput, Vector3 direction) {
+        var playerShellObject = _playerVisual.transform.GetChild(playerShellIndex).gameObject;
+        var playerTreadsObject = _playerVisual.transform.GetChild(playerTreadsIndex).gameObject;
+
+        if(_lastMovementInput != movementInput) {
+            _lastMovementInput = movementInput;
+            _bodyRotationProgress = 0.0f;
+        }
+        if(Math.Abs(movementInput.y) > 0.1f || Math.Abs(movementInput.x) > 0.1f) {
+             _bodyRotationProgress += Time.deltaTime;
+
+            // Figure out the current angle/axis
+            Quaternion sourceOrientation = playerShellObject.transform.rotation;
+            float sourceAngle;
+            Vector3 sourceAxis;
+            sourceOrientation.ToAngleAxis(out sourceAngle, out sourceAxis);
+
+            // Calculate a new target orientation
+            var targetAngle = GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z));
+            // Ensure the shortest path is taken to the angle (by allowing over 360 and under 0 degrees)
+            if((sourceAngle % 360) - targetAngle > 180) targetAngle = sourceAngle + (360 - (sourceAngle % 360) + targetAngle);
+            else if(targetAngle - (sourceAngle % 360) > 180) targetAngle = sourceAngle - (sourceAngle % 360) - (360 - targetAngle);
+         
+            // Interpolate to get the current angle/axis between the source and target.
+            float currentAngle = Mathf.Lerp(sourceAngle, targetAngle, Math.Min(_bodyRotationProgress, 1));
+           
+            // Assign the current rotation
+            _currentBodyRotation = currentAngle;
+            if(currentAngle >= 360) {
+                _currentBodyRotation = currentAngle % 360;
+            } else if(currentAngle < 0){
+                _currentBodyRotation = 360 + (currentAngle % 360);
+            }
+        }
+        var targetAxis = new Vector3(0f,1f,0f);
+        playerShellObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
+        playerTreadsObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
+    }
+
+    private float GetYRotFromVec(Vector2 v1, Vector2 v2)
+    {
+        float _r = Mathf.Atan2(v1.x - v2.x, v1.y - v2.y);
+        float _d = (_r / Mathf.PI) * 180 - 90;
+        if(_d < 0) _d = 360 - Math.Abs(_d);
+     
+        return _d;
     }
 
     private void MovementSoundEffect() {
