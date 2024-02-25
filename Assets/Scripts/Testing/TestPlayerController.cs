@@ -30,6 +30,7 @@ public class TestPlayerController : NetworkBehaviour
     [SerializeField]
     private GameObject _projectileExplosionPrefab; 
 
+    private PlayerData _playerData;
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
@@ -79,8 +80,8 @@ public class TestPlayerController : NetworkBehaviour
         _movementAudioSource = audioSources[0];
         _missingProjectileAudioSource = audioSources[1];
         if (!IsOwner) _camera.enabled = false;
-        var playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
+        _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId));
     }
 
     public override void OnNetworkSpawn()
@@ -202,8 +203,10 @@ public class TestPlayerController : NetworkBehaviour
             var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
             var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
 
-            Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
-            Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+            var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
+            projectile.GetComponent<ShellProjectile>().SetOriginPlayerId(_playerData.PlayerId);
+            var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+            Destroy(explosion, 3);
 
             // Add recoil to the tank
             var direction = transform.forward * -1;

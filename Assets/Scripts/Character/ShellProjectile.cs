@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShellProjectile : MonoBehaviour
+public class ShellProjectile : IProjectile
 {
     [SerializeField]
     private float projectileSpeed = 10.0f;
