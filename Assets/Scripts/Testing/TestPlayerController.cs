@@ -189,33 +189,35 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        if(!MatchUIManager.instance.isReloading) {
-            // Add the projectile GameObject and the explosion
-            var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
+        if(IsOwner) {
+            if(!MatchUIManager.instance.isReloading) {
+                // Add the projectile GameObject and the explosion
+                var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
 
-            var thisObjectHeight = transform.position.y;
-            var playerHeadObjectSize = playerHeadObject.GetComponent<Renderer>().bounds.size;
-            var playerHeadObjectHeightCenter = playerHeadObject.transform.position.y + (playerHeadObjectSize.y * 0.45f); // 0.45 is exact location of cannon in head
-            var playerHeadObjectWidth = playerHeadObjectSize.z;
-            var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
-            
-            var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
-            var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
-            var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+                var thisObjectHeight = transform.position.y;
+                var playerHeadObjectSize = playerHeadObject.GetComponent<Renderer>().bounds.size;
+                var playerHeadObjectHeightCenter = playerHeadObject.transform.position.y + (playerHeadObjectSize.y * 0.45f); // 0.45 is exact location of cannon in head
+                var playerHeadObjectWidth = playerHeadObjectSize.z;
+                var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
+                
+                var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
+                var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
+                var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
 
-            var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
-            projectile.GetComponent<ShellProjectile>().SetOriginPlayerId(_playerData.PlayerId);
-            var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
-            Destroy(explosion, 3);
+                var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
+                projectile.GetComponent<ShellProjectile>().SetOriginPlayerId(_playerData.PlayerId);
+                var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+                Destroy(explosion, 3);
 
-            // Add recoil to the tank
-            var direction = transform.forward * -1;
-            _rigidBody.AddForce(direction.normalized * _fireRecoilForce, ForceMode.Impulse);
+                // Add recoil to the tank
+                var direction = transform.forward * -1;
+                _rigidBody.AddForce(direction.normalized * _fireRecoilForce, ForceMode.Impulse);
 
-            // Update game ui to display "reloading" state
-            MatchUIManager.instance.StartReload();
-        } else {
-            _missingProjectileAudioSource.Play(0);
+                // Update game ui to display "reloading" state
+                MatchUIManager.instance.StartReload();
+            } else {
+                _missingProjectileAudioSource.Play(0);
+            }
         }
     }
 }
