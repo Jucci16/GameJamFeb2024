@@ -557,10 +557,18 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6978780207814180311, guid: d1f47737b8e3ec24ebb99431014a6e4a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5845143464004277466}
     - targetCorrespondingSourceObject: {fileID: 854866635445919345, guid: d1f47737b8e3ec24ebb99431014a6e4a,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 8958298738200329089}
+    - targetCorrespondingSourceObject: {fileID: 854866635445919345, guid: d1f47737b8e3ec24ebb99431014a6e4a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5154051220341207012}
   m_SourcePrefab: {fileID: 100100000, guid: d1f47737b8e3ec24ebb99431014a6e4a, type: 3}
 --- !u!1 &2268425091634418744 stripped
 GameObject:
@@ -589,6 +597,36 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.042334825, y: 0.026231619, z: 1.5853521}
   m_Center: {x: 0.000005330892, y: -0.012427543, z: 0.00000023841864}
+--- !u!114 &5154051220341207012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268425091634418744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cccefec4bf0f8ec47afce4b52676bd15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  Interpolate: 1
+  SlerpPosition: 0
 --- !u!114 &2477175546886650200 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3947046906740601617, guid: d1f47737b8e3ec24ebb99431014a6e4a,
@@ -607,3 +645,39 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1487885758443653705}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8394590586215069598 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6978780207814180311, guid: d1f47737b8e3ec24ebb99431014a6e4a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1487885758443653705}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5845143464004277466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8394590586215069598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cccefec4bf0f8ec47afce4b52676bd15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  Interpolate: 1
+  SlerpPosition: 0
