@@ -148,9 +148,9 @@ GameObject:
   - component: {fileID: 315400969022068303}
   - component: {fileID: 7967690017409705448}
   - component: {fileID: 203704498997827441}
+  - component: {fileID: 1453049320508413215}
   - component: {fileID: 7268804457145310386}
   - component: {fileID: 5044481669652631412}
-  - component: {fileID: 1453049320508413215}
   - component: {fileID: 1153084200806515910}
   - component: {fileID: 7147656757684639246}
   m_Layer: 0
@@ -218,6 +218,22 @@ MonoBehaviour:
     type: 3}
   _projectileExplosionPrefab: {fileID: 2976218027330178980, guid: 9d7a6dfcab2125144a8228830bab7d9b,
     type: 3}
+  state: 0
+--- !u!114 &1453049320508413215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7090444979680509126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c91981a32c37b2b46a8c94166b6ac32f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  overridePlayerId: 
+  _explosionPrefab: {fileID: 2976218027330178980, guid: 3a8ce0aef05f1054290ab76df22c7305,
+    type: 3}
 --- !u!54 &7268804457145310386
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -275,21 +291,6 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &1453049320508413215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7090444979680509126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c91981a32c37b2b46a8c94166b6ac32f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  overridePlayerId: 
-  _explosionPrefab: {fileID: 2976218027330178980, guid: 3a8ce0aef05f1054290ab76df22c7305,
-    type: 3}
 --- !u!82 &1153084200806515910
 AudioSource:
   m_ObjectHideFlags: 0
@@ -547,6 +548,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3868806106403707158, guid: d1f47737b8e3ec24ebb99431014a6e4a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4198432821707100097, guid: d1f47737b8e3ec24ebb99431014a6e4a,
         type: 3}
       propertyPath: m_Name
@@ -588,7 +594,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2268425091634418744}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 519bb99d723fad84899a6f4fbb36425a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

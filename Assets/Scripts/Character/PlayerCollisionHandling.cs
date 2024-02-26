@@ -53,32 +53,53 @@ public class PlayerCollisionHandling : NetworkBehaviour
     }
 
     private IEnumerator StartPlayerRespawnTimer() {
-        yield return new WaitForSeconds(3);
-        RespawnPlayer();
-    }
-
-    private void RespawnPlayer() {
-        gameObject.transform.position = new Vector3(0f, 2f, 0f);
+        yield return new WaitForSeconds(2);
+        ResetPlayerPosition();
+        yield return new WaitForSeconds(1);
         UpdatePlayerDisplayState(PlayerDisplayState.show);
     }
 
+    private void ResetPlayerPosition() {
+        if(IsOwner) {
+            System.Random r = new System.Random();
+            var spawnPosition = MultiplayTestSceneManager.playerSpawnPositions[r.Next(0, MultiplayTestSceneManager.playerSpawnPositions.Count)];
+            var targetAngle = TransformUtils.GetYRotFromVec(new Vector2(0f,0f), new Vector2(spawnPosition.x, spawnPosition.z));
+            gameObject.transform.position = spawnPosition;
+            gameObject.transform.rotation = Quaternion.Euler(0, targetAngle, 0);
+            gameObject.GetComponent<TestPlayerController>().resetYRotation(targetAngle);
+        }
+    }
+
+    // Probably can be done better but this was the only way I could successfully hide the body without causing the camera to fall due to gravity. 
+    // Also, if you just set the entire "playerVisual" to inactive/active, it will jump across the screen and looks really bad (because some children have NetworkTransforms). Disabling the individual MeshRenderers worked though.
     private void UpdatePlayerDisplayState(PlayerDisplayState state) {
+        gameObject.GetComponent<TestPlayerController>().state = state;
         var rigidBody = gameObject.GetComponent<Rigidbody>();
         var playerVisual = gameObject.transform.GetChild(1).gameObject;
         switch(state) {
             case PlayerDisplayState.show:
+                rigidBody.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 rigidBody.isKinematic = false;
-                playerVisual.SetActive(true);
+                rigidBody.detectCollisions = true;
+                playerVisual.transform.GetChild(0).gameObject.SetActive(true);
+                playerVisual.transform.GetChild(1).GetComponent<MeshRenderer>().enabled = true;
+                playerVisual.transform.GetChild(2).GetComponent<MeshRenderer>().enabled = true;
+                playerVisual.transform.GetChild(2).GetChild(0).GetComponent<MeshRenderer>().enabled = true;
                 break;
             case PlayerDisplayState.hide:
+                rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
                 rigidBody.isKinematic = true;
-                playerVisual.SetActive(false);
+                rigidBody.detectCollisions = false;
+                playerVisual.transform.GetChild(0).gameObject.SetActive(false);
+                playerVisual.transform.GetChild(1).GetComponent<MeshRenderer>().enabled = false;
+                playerVisual.transform.GetChild(2).GetComponent<MeshRenderer>().enabled = false;
+                playerVisual.transform.GetChild(2).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                 break;
         }
     }
 }
 
-enum PlayerDisplayState {
+public enum PlayerDisplayState {
     show,
     hide
 }

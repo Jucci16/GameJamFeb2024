@@ -36,6 +36,7 @@ public class TestPlayerController : NetworkBehaviour
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
     private InputAction _lookInputAction;
+    public PlayerDisplayState state = PlayerDisplayState.show;
     private Rigidbody _rigidBody;
     private AudioSource _movementAudioSource;
     private AudioSource _missingProjectileAudioSource;
@@ -100,7 +101,7 @@ public class TestPlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (IsOwner)
+        if (IsOwner && state == PlayerDisplayState.show)
         {
             Look();
             MovementSoundEffect();
@@ -109,10 +110,14 @@ public class TestPlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (IsOwner)
+        if (IsOwner && state == PlayerDisplayState.show)
         {
             Movement();
         }
+    }
+
+    public void resetYRotation(float rotation) {
+        _yRotation = rotation;
     }
 
     private void Movement()
@@ -185,7 +190,7 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        if(IsOwner) {
+        if(IsOwner && state == PlayerDisplayState.show) {
             if(!MatchUIManager.instance.isReloading) {
                 // Add the projectile GameObject and the explosion
                 var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
@@ -229,6 +234,8 @@ public class TestPlayerController : NetworkBehaviour
 
     private IEnumerator StartProjectileDespawnTimer(ShellProjectile projectile) {
         yield return new WaitForSeconds(3);
-        projectile.DespawnServerRpc();
+        if(!projectile.isDestroyed) {
+            projectile.DespawnServerRpc();
+        }
     }
 }

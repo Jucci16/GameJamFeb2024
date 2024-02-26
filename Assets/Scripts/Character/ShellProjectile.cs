@@ -23,6 +23,8 @@ public class ShellProjectile : IProjectile
 
     [ServerRpc]
     public void DespawnServerRpc() {
-        GetComponent<NetworkObject>().Despawn();
+        if(!isDestroyed) {
+            GetComponent<NetworkObject>().Despawn();
+        }
     }
 }
