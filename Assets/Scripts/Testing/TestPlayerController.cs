@@ -76,6 +76,7 @@ public class TestPlayerController : NetworkBehaviour
 
     void Start()
     {
+        _yRotation = transform.rotation.eulerAngles.y;
         _rigidBody = GetComponent<Rigidbody>();
         var audioSources = GetComponents<AudioSource>();
         _movementAudioSource = audioSources[0];
@@ -144,7 +145,7 @@ public class TestPlayerController : NetworkBehaviour
             sourceOrientation.ToAngleAxis(out sourceAngle, out sourceAxis);
 
             // Calculate a new target orientation
-            var targetAngle = GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z));
+            var targetAngle = (TransformUtils.GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z)) + 270) % 360;
             // Ensure the shortest path is taken to the angle (by allowing over 360 and under 0 degrees)
             if((sourceAngle % 360) - targetAngle > 180) targetAngle = sourceAngle + (360 - (sourceAngle % 360) + targetAngle);
             else if(targetAngle - (sourceAngle % 360) > 180) targetAngle = sourceAngle - (sourceAngle % 360) - (360 - targetAngle);
@@ -163,15 +164,6 @@ public class TestPlayerController : NetworkBehaviour
         var targetAxis = new Vector3(0f,1f,0f);
         playerShellObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
         playerTreadsObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
-    }
-
-    private float GetYRotFromVec(Vector2 v1, Vector2 v2)
-    {
-        float _r = Mathf.Atan2(v1.x - v2.x, v1.y - v2.y);
-        float _d = (_r / Mathf.PI) * 180 - 90;
-        if(_d < 0) _d = 360 - Math.Abs(_d);
-     
-        return _d;
     }
 
     private void MovementSoundEffect() {
