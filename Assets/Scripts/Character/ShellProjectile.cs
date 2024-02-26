@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class ShellProjectile : MonoBehaviour
+public class ShellProjectile : IProjectile
 {
     [SerializeField]
     private float projectileSpeed = 10.0f;
@@ -12,13 +13,16 @@ public class ShellProjectile : MonoBehaviour
     void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
-        // Automatically remove GameObject after some time.
-        Destroy(gameObject, 3);
     }
 
     private void FixedUpdate()
     {
         Vector3 movementDirection = transform.rotation * Vector3.forward;
         _rigidBody.MovePosition(_rigidBody.position + movementDirection * projectileSpeed * Time.deltaTime);
+    }
+
+    [ServerRpc]
+    public void DespawnServerRpc() {
+        GetComponent<NetworkObject>().Despawn();
     }
 }

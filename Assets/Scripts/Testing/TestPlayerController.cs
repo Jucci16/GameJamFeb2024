@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,6 +31,7 @@ public class TestPlayerController : NetworkBehaviour
     [SerializeField]
     private GameObject _projectileExplosionPrefab; 
 
+    private PlayerData _playerData;
     private TestPlayerInputActions _inputAction;
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
@@ -78,9 +80,12 @@ public class TestPlayerController : NetworkBehaviour
         var audioSources = GetComponents<AudioSource>();
         _movementAudioSource = audioSources[0];
         _missingProjectileAudioSource = audioSources[1];
-        if (!IsOwner) _camera.enabled = false;
-        var playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(playerData.ColorId));
+        if (!IsOwner) {
+            _camera.enabled = false;
+            Destroy(_camera.gameObject.GetComponent<AudioListener>());
+        }
+        _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId));
     }
 
     public override void OnNetworkSpawn()
@@ -188,31 +193,50 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        if(!MatchUIManager.instance.isReloading) {
-            // Add the projectile GameObject and the explosion
-            var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
+        if(IsOwner) {
+            if(!MatchUIManager.instance.isReloading) {
+                // Add the projectile GameObject and the explosion
+                var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
 
-            var thisObjectHeight = transform.position.y;
-            var playerHeadObjectSize = playerHeadObject.GetComponent<Renderer>().bounds.size;
-            var playerHeadObjectHeightCenter = playerHeadObject.transform.position.y + (playerHeadObjectSize.y * 0.45f); // 0.45 is exact location of cannon in head
-            var playerHeadObjectWidth = playerHeadObjectSize.z;
-            var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
-            
-            var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
-            var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
-            var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+                var thisObjectHeight = transform.position.y;
+                var playerHeadObjectSize = playerHeadObject.GetComponent<Renderer>().bounds.size;
+                var playerHeadObjectHeightCenter = playerHeadObject.transform.position.y + (playerHeadObjectSize.y * 0.45f); // 0.45 is exact location of cannon in head
+                var playerHeadObjectWidth = playerHeadObjectSize.z;
+                var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
+                
+                Vector3 launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
+                Vector3 forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
+                Vector3 explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+                Quaternion playerRotation = transform.rotation;
 
-            Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
-            Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+                SpawnProjectileServerRpc(_playerData.PlayerId.ToString(), launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
 
-            // Add recoil to the tank
-            var direction = transform.forward * -1;
-            _rigidBody.AddForce(direction.normalized * _fireRecoilForce, ForceMode.Impulse);
+                // Add recoil to the tank
+                var direction = transform.forward * -1;
+                _rigidBody.AddForce(direction.normalized * _fireRecoilForce, ForceMode.Impulse);
 
-            // Update game ui to display "reloading" state
-            MatchUIManager.instance.StartReload();
-        } else {
-            _missingProjectileAudioSource.Play(0);
+                // Update game ui to display "reloading" state
+                MatchUIManager.instance.StartReload();
+            } else {
+                _missingProjectileAudioSource.Play(0);
+            }
         }
+    }
+
+    [ServerRpc]
+    private void SpawnProjectileServerRpc(string shotByPlayerId, Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
+    {
+        var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, playerRotation);
+        var projectileScript = projectile.GetComponent<ShellProjectile>();
+        projectileScript.SetOriginPlayerId(shotByPlayerId);
+        projectile.GetComponent<NetworkObject>().Spawn();
+        StartCoroutine(StartProjectileDespawnTimer(projectileScript));
+        var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+        explosion.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private IEnumerator StartProjectileDespawnTimer(ShellProjectile projectile) {
+        yield return new WaitForSeconds(3);
+        projectile.DespawnServerRpc();
     }
 }
