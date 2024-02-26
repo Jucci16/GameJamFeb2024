@@ -38,8 +38,6 @@ public class PlayerCollisionHandling : NetworkBehaviour
     [ServerRpc]
     public void KaboomServerRpc(NetworkObjectReference projectile) {
         ((GameObject) projectile).GetComponent<NetworkObject>().Despawn();
-        var explosion = Instantiate(_explosionPrefab, transform.position, transform.rotation);
-        explosion.GetComponent<NetworkObject>().Spawn();
 
         // Destroy player object and respawn
         PlayerDeathClientRpc();
@@ -47,12 +45,40 @@ public class PlayerCollisionHandling : NetworkBehaviour
 
     [ClientRpc]
     private void PlayerDeathClientRpc() {
-        // remove the object's rigidbody so the camera is locked in place
-        var rigidBody = gameObject.GetComponent<Rigidbody>();
-        Destroy(rigidBody);
+        Instantiate(_explosionPrefab, transform.position, transform.rotation);
+        UpdatePlayerDisplayState(PlayerDisplayState.hide);
 
-        // remove the player visual from the object, since they exploded.
-        var playerVisual = gameObject.transform.GetChild(1).gameObject;
-        Destroy(playerVisual);
+        // Start respawn timer
+        StartCoroutine(StartPlayerRespawnTimer());
     }
+
+    private IEnumerator StartPlayerRespawnTimer() {
+        yield return new WaitForSeconds(3);
+        RespawnPlayer();
+    }
+
+    private void RespawnPlayer() {
+        gameObject.transform.position = new Vector3(0f, 2f, 0f);
+        UpdatePlayerDisplayState(PlayerDisplayState.show);
+    }
+
+    private void UpdatePlayerDisplayState(PlayerDisplayState state) {
+        var rigidBody = gameObject.GetComponent<Rigidbody>();
+        var playerVisual = gameObject.transform.GetChild(1).gameObject;
+        switch(state) {
+            case PlayerDisplayState.show:
+                rigidBody.isKinematic = false;
+                playerVisual.SetActive(true);
+                break;
+            case PlayerDisplayState.hide:
+                rigidBody.isKinematic = true;
+                playerVisual.SetActive(false);
+                break;
+        }
+    }
+}
+
+enum PlayerDisplayState {
+    show,
+    hide
 }
