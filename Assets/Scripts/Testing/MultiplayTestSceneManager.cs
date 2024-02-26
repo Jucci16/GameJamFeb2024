@@ -26,7 +26,7 @@ public class MultiplayTestSceneManager : NetworkBehaviour
         int i = 0;
         foreach(var clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {   
-            Vector2 spawnPosition = new Vector3(0f, 0.5f, 0f) + new Vector3(1f,0f,1f) * (i * 10);
+            Vector2 spawnPosition = new Vector3(0f, 0.5f, 0f) + new Vector3(1f,0f,1f) * (i * 15);
             Transform player = Instantiate(_playerPrefab, spawnPosition, Quaternion.identity);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             i++;

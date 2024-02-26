@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-public class IProjectile : MonoBehaviour
+public class IProjectile : NetworkBehaviour
 {
-    public FixedString64Bytes originPlayerId;
+    public string originPlayerId;
 
-    public void SetOriginPlayerId(FixedString64Bytes shotBy) {
+    public void SetOriginPlayerId(string shotBy) {
         originPlayerId = shotBy;
     }
 }

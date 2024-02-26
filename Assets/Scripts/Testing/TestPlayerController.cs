@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -79,7 +80,10 @@ public class TestPlayerController : NetworkBehaviour
         var audioSources = GetComponents<AudioSource>();
         _movementAudioSource = audioSources[0];
         _missingProjectileAudioSource = audioSources[1];
-        if (!IsOwner) _camera.enabled = false;
+        if (!IsOwner) {
+            _camera.enabled = false;
+            Destroy(_camera.gameObject.GetComponent<AudioListener>());
+        }
         _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
         _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId));
     }
@@ -200,14 +204,12 @@ public class TestPlayerController : NetworkBehaviour
                 var playerHeadObjectWidth = playerHeadObjectSize.z;
                 var cannonHeight = playerHeadObjectHeightCenter - thisObjectHeight;
                 
-                var launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
-                var forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
-                var explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+                Vector3 launchPosition = new Vector3(transform.position.x, cannonHeight, transform.position.z);
+                Vector3 forwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.5f);
+                Vector3 explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
+                Quaternion playerRotation = transform.rotation;
 
-                var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, transform.rotation);
-                projectile.GetComponent<ShellProjectile>().SetOriginPlayerId(_playerData.PlayerId);
-                var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
-                Destroy(explosion, 3);
+                SpawnProjectileServerRpc(_playerData.PlayerId.ToString(), launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
 
                 // Add recoil to the tank
                 var direction = transform.forward * -1;
@@ -219,5 +221,22 @@ public class TestPlayerController : NetworkBehaviour
                 _missingProjectileAudioSource.Play(0);
             }
         }
+    }
+
+    [ServerRpc]
+    private void SpawnProjectileServerRpc(string shotByPlayerId, Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
+    {
+        var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, playerRotation);
+        var projectileScript = projectile.GetComponent<ShellProjectile>();
+        projectileScript.SetOriginPlayerId(shotByPlayerId);
+        projectile.GetComponent<NetworkObject>().Spawn();
+        StartCoroutine(StartProjectileDespawnTimer(projectileScript));
+        var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
+        explosion.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private IEnumerator StartProjectileDespawnTimer(ShellProjectile projectile) {
+        yield return new WaitForSeconds(3);
+        projectile.DespawnServerRpc();
     }
 }
