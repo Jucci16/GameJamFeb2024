@@ -16,6 +16,10 @@ public class GameOverUI : NetworkBehaviour
     
     [SerializeField] 
     private Button _spectateButton;
+    
+    [SerializeField] 
+    private Button _spectatorBackButton;
+
 
     private void Awake() {
         Instance = this;
@@ -25,9 +29,15 @@ public class GameOverUI : NetworkBehaviour
         });
         _spectateButton.onClick.AddListener(async () => { 
             Hide();
+            _spectatorBackButton.gameObject.SetActive(true);
+        });
+        _spectatorBackButton.onClick.AddListener(async () => { 
+            gameObject.SetActive(true);
+            _spectatorBackButton.gameObject.SetActive(false);
         });
         _mainMenuButton.gameObject.SetActive(false);
         _spectateButton.gameObject.SetActive(false);
+        _spectatorBackButton.gameObject.SetActive(false);
     }
 
     private void Start()
