@@ -36,6 +36,7 @@ public class TestPlayerController : NetworkBehaviour
     private InputAction _moveInputAction;
     private InputAction _fireInputAction;
     private InputAction _lookInputAction;
+    public PlayerDisplayState state = PlayerDisplayState.show;
     private Rigidbody _rigidBody;
     private AudioSource _movementAudioSource;
     private AudioSource _missingProjectileAudioSource;
@@ -76,6 +77,7 @@ public class TestPlayerController : NetworkBehaviour
 
     void Start()
     {
+        _yRotation = transform.rotation.eulerAngles.y;
         _rigidBody = GetComponent<Rigidbody>();
         var audioSources = GetComponents<AudioSource>();
         _movementAudioSource = audioSources[0];
@@ -85,7 +87,9 @@ public class TestPlayerController : NetworkBehaviour
             Destroy(_camera.gameObject.GetComponent<AudioListener>());
         }
         _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId));
+        var playerColor = MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId);
+        _playerVisual.SetPlayerColor(playerColor);
+        if (IsOwner) MatchUIManager.instance.SetPlayerColor(playerColor);
     }
 
     public override void OnNetworkSpawn()
@@ -99,7 +103,7 @@ public class TestPlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (IsOwner)
+        if (IsOwner && state == PlayerDisplayState.show)
         {
             Look();
             MovementSoundEffect();
@@ -108,10 +112,14 @@ public class TestPlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (IsOwner)
+        if (IsOwner && state == PlayerDisplayState.show)
         {
             Movement();
         }
+    }
+
+    public void resetYRotation(float rotation) {
+        _yRotation = rotation;
     }
 
     private void Movement()
@@ -144,7 +152,7 @@ public class TestPlayerController : NetworkBehaviour
             sourceOrientation.ToAngleAxis(out sourceAngle, out sourceAxis);
 
             // Calculate a new target orientation
-            var targetAngle = GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z));
+            var targetAngle = (TransformUtils.GetYRotFromVec(new Vector2(0f,0f), new Vector2(direction.x, direction.z)) + 270) % 360;
             // Ensure the shortest path is taken to the angle (by allowing over 360 and under 0 degrees)
             if((sourceAngle % 360) - targetAngle > 180) targetAngle = sourceAngle + (360 - (sourceAngle % 360) + targetAngle);
             else if(targetAngle - (sourceAngle % 360) > 180) targetAngle = sourceAngle - (sourceAngle % 360) - (360 - targetAngle);
@@ -163,15 +171,6 @@ public class TestPlayerController : NetworkBehaviour
         var targetAxis = new Vector3(0f,1f,0f);
         playerShellObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
         playerTreadsObject.transform.rotation = Quaternion.AngleAxis(_currentBodyRotation, targetAxis);
-    }
-
-    private float GetYRotFromVec(Vector2 v1, Vector2 v2)
-    {
-        float _r = Mathf.Atan2(v1.x - v2.x, v1.y - v2.y);
-        float _d = (_r / Mathf.PI) * 180 - 90;
-        if(_d < 0) _d = 360 - Math.Abs(_d);
-     
-        return _d;
     }
 
     private void MovementSoundEffect() {
@@ -193,7 +192,7 @@ public class TestPlayerController : NetworkBehaviour
 
     private void Fire(InputAction.CallbackContext context)
     {
-        if(IsOwner) {
+        if(IsOwner && state == PlayerDisplayState.show) {
             if(!MatchUIManager.instance.isReloading) {
                 // Add the projectile GameObject and the explosion
                 var playerHeadObject = _playerVisual.transform.GetChild(playerHeadIndex).gameObject;
@@ -209,7 +208,7 @@ public class TestPlayerController : NetworkBehaviour
                 Vector3 explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
                 Quaternion playerRotation = transform.rotation;
 
-                SpawnProjectileServerRpc(_playerData.PlayerId.ToString(), launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
+                SpawnProjectileServerRpc(launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
 
                 // Add recoil to the tank
                 var direction = transform.forward * -1;
@@ -224,12 +223,11 @@ public class TestPlayerController : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void SpawnProjectileServerRpc(string shotByPlayerId, Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
+    private void SpawnProjectileServerRpc(Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
     {
         var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, playerRotation);
         var projectileScript = projectile.GetComponent<ShellProjectile>();
-        projectileScript.SetOriginPlayerId(shotByPlayerId);
-        projectile.GetComponent<NetworkObject>().Spawn();
+        projectile.GetComponent<NetworkObject>().SpawnWithOwnership(_playerData.ClientId);
         StartCoroutine(StartProjectileDespawnTimer(projectileScript));
         var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
         explosion.GetComponent<NetworkObject>().Spawn();
@@ -237,6 +235,8 @@ public class TestPlayerController : NetworkBehaviour
 
     private IEnumerator StartProjectileDespawnTimer(ShellProjectile projectile) {
         yield return new WaitForSeconds(3);
-        projectile.DespawnServerRpc();
+        if(!projectile.isDestroyed) {
+            projectile.DespawnServerRpc();
+        }
     }
 }
