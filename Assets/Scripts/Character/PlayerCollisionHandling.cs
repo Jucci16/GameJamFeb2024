@@ -55,7 +55,7 @@ public class PlayerCollisionHandling : NetworkBehaviour
     private IEnumerator StartPlayerRespawnTimer() {
         yield return new WaitForSeconds(2);
         ResetPlayerPosition();
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(RespawnCountdown.respawnTimeSeconds);
         UpdatePlayerDisplayState(PlayerDisplayState.show);
     }
 
@@ -67,6 +67,7 @@ public class PlayerCollisionHandling : NetworkBehaviour
             gameObject.transform.position = spawnPosition;
             gameObject.transform.rotation = Quaternion.Euler(0, targetAngle, 0);
             gameObject.GetComponent<TestPlayerController>().resetYRotation(targetAngle);
+            RespawnCountdown.Instance.StartRespawnCountdown();
         }
     }
 
