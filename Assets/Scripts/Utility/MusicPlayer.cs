@@ -16,19 +16,15 @@ public class MusicPlayer : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance != null) {
+            var audioSource = Instance.GetComponent<AudioSource>();
+            audioSource.Stop();
+        }
         Instance = this;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
