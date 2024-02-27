@@ -63,6 +63,7 @@ public class PlayerCollisionHandling : NetworkBehaviour
             gameObject.transform.rotation = Quaternion.Euler(0, targetAngle, 0);
             gameObject.GetComponent<TestPlayerController>().resetYRotation(targetAngle);
             RespawnCountdown.Instance.StartRespawnCountdown();
+            MatchUIManager.instance.DecrementLifeCount();
         }
     }
 

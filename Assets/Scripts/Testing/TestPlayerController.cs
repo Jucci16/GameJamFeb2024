@@ -87,7 +87,9 @@ public class TestPlayerController : NetworkBehaviour
             Destroy(_camera.gameObject.GetComponent<AudioListener>());
         }
         _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
-        _playerVisual.SetPlayerColor(MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId));
+        var playerColor = MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId);
+        _playerVisual.SetPlayerColor(playerColor);
+        if (IsOwner) MatchUIManager.instance.SetPlayerColor(playerColor);
     }
 
     public override void OnNetworkSpawn()
