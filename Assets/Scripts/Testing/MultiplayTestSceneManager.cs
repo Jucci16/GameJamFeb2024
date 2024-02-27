@@ -23,6 +23,9 @@ public class MultiplayTestSceneManager : NetworkBehaviour
     [SerializeField]
     private GameObject _playerPrefab;
 
+    [SerializeField]
+    private Camera _spectatorCamera;
+
     public static MultiplayTestSceneManager Instance {  get; private set; }
 
     public override void OnNetworkSpawn()
@@ -45,6 +48,10 @@ public class MultiplayTestSceneManager : NetworkBehaviour
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
             clientIndex++;
         }
+    }
+
+    public void EnableSpectatorCamera(bool enabled = true) {
+        _spectatorCamera.enabled = enabled; 
     }
 
     private void Awake()

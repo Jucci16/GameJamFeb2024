@@ -1,16 +1,33 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
-public class GameOverUI : MonoBehaviour
+public class GameOverUI : NetworkBehaviour
 {
     public static GameOverUI Instance;
 
     [SerializeField]
     private TextMeshProUGUI _gameOverText;
 
+    [SerializeField] 
+    private Button _mainMenuButton;
+    
+    [SerializeField] 
+    private Button _spectateButton;
+
     private void Awake() {
         Instance = this;
+        _mainMenuButton.onClick.AddListener(async () => { 
+            await UnityLobbyManager.Instance.LeaveLobby();
+            LevelLoader.Load(LevelEnum.MainMenuScene); 
+        });
+        _spectateButton.onClick.AddListener(async () => { 
+            Hide();
+        });
+        _mainMenuButton.gameObject.SetActive(false);
+        _spectateButton.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -35,6 +52,12 @@ public class GameOverUI : MonoBehaviour
                 break;
         }
         gameObject.SetActive(true);
+        Invoke("showActionButtons", 1);
+    }
+
+    private void showActionButtons() {
+        if(!IsServer) _mainMenuButton.gameObject.SetActive(true);
+        _spectateButton.gameObject.SetActive(true);
     }
 
     public bool isGameOver() {
