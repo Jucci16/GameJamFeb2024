@@ -20,12 +20,15 @@ public class GameOverUI : NetworkBehaviour
     [SerializeField] 
     private Button _spectatorBackButton;
 
-
     private void Awake() {
         Instance = this;
         _mainMenuButton.onClick.AddListener(async () => { 
-            await UnityLobbyManager.Instance.LeaveLobby();
-            LevelLoader.Load(LevelEnum.MainMenuScene); 
+            if(IsServer) {
+                GameOverHostWarningUI.Instance.Show();
+            } else {
+                await UnityLobbyManager.Instance.LeaveLobby();
+                LevelLoader.Load(LevelEnum.MainMenuScene); 
+            }
         });
         _spectateButton.onClick.AddListener(async () => { 
             Hide();
@@ -66,7 +69,7 @@ public class GameOverUI : NetworkBehaviour
     }
 
     private void showActionButtons() {
-        if(!IsServer) _mainMenuButton.gameObject.SetActive(true);
+        _mainMenuButton.gameObject.SetActive(true);
         _spectateButton.gameObject.SetActive(true);
     }
 
