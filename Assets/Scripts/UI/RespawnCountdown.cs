@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -23,12 +21,12 @@ public class RespawnCountdown : MonoBehaviour
         Hide();
     }
 
-    private void Hide()
+    public void Hide()
     {
         gameObject.SetActive(false);
     }
 
-    private void Show()
+    public void Show()
     {
         gameObject.SetActive(true);
     }
@@ -47,9 +45,10 @@ public class RespawnCountdown : MonoBehaviour
     }
 
     public void StartRespawnCountdown() {
+        if(GameOverUI.Instance.isGameOver()) return;
+
         Show();
         _timeElapsed = 0.0f;
-
         _countText.text = ((int)respawnTimeSeconds).ToString();
     }
 }

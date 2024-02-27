@@ -36,6 +36,16 @@ public class MatchUIManager : MonoBehaviour
         ResetReload();
     }
 
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
     public void SpawnLivesRemainingIcons() {
         _livesRemainingIcons = new List<Image>{_livesRemainingIcon};
         var iconRectTransform = _livesRemainingIcon.GetComponent<RectTransform>();
@@ -70,12 +80,17 @@ public class MatchUIManager : MonoBehaviour
         isReloading = false;
     }
 
-    public void DecrementLifeCount() {
+    // Resturns true if no lives remaining.
+    public bool DecrementLifeCount() {
         var endIcon = _livesRemainingIcons[_livesRemainingIcons.Count - 1];
         _livesRemainingIcons.Remove(endIcon);
         Destroy(endIcon);
         if(_livesRemainingIcons.Count == 0) {
-            // game over
+            Hide();
+            RespawnCountdown.Instance.Hide();
+            GameOverUI.Instance.Show(GameOverStatus.loser);
+            return true;
         }
+        return false;
     }
 }
