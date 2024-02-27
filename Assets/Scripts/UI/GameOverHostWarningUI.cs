@@ -22,7 +22,7 @@ public class GameOverHostWarningUI : MonoBehaviour
             await UnityLobbyManager.Instance.LeaveLobby();
             LevelLoader.Load(LevelEnum.MainMenuScene); 
         });
-        _backButton.onClick.AddListener(async () => { 
+        _backButton.onClick.AddListener(() => { 
             Hide();
         });
     }

@@ -39,6 +39,7 @@ public class MultiplayTestSceneManager : NetworkBehaviour
 
     private void CumulativeLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
+        MultiplayerManager.Instance.ResetPlayersForNewMatch();
         int clientIndex = 0;
         foreach(var clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {   

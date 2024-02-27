@@ -30,11 +30,11 @@ public class GameOverUI : NetworkBehaviour
                 LevelLoader.Load(LevelEnum.MainMenuScene); 
             }
         });
-        _spectateButton.onClick.AddListener(async () => { 
+        _spectateButton.onClick.AddListener(() => { 
             Hide();
             _spectatorBackButton.gameObject.SetActive(true);
         });
-        _spectatorBackButton.onClick.AddListener(async () => { 
+        _spectatorBackButton.onClick.AddListener(() => { 
             gameObject.SetActive(true);
             _spectatorBackButton.gameObject.SetActive(false);
         });
@@ -65,6 +65,8 @@ public class GameOverUI : NetworkBehaviour
                 break;
         }
         gameObject.SetActive(true);
+        MatchUIManager.instance.Hide();
+        RespawnCountdown.Instance.Hide();
         Invoke("showActionButtons", 1);
     }
 

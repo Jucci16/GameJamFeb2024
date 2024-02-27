@@ -54,8 +54,8 @@ public class PlayerCollisionHandling : NetworkBehaviour
         if(IsOwner) isGameOver = MatchUIManager.instance.DecrementLifeCount();
         // If a Game Over occurred for the current player, enable the new camera and despawn the player from the server.
         if(isGameOver) {
+            MultiplayerManager.Instance.PlayerGameOverServerRpc(gameObject);
             MultiplayTestSceneManager.Instance.EnableSpectatorCamera();
-            DespawnPlayerServerRpc();
         } 
         // If no Game Over occurred, reset the player position and respawn after some time.
         else {
@@ -102,16 +102,8 @@ public class PlayerCollisionHandling : NetworkBehaviour
                 playerVisual.transform.GetChild(2).GetComponent<MeshRenderer>().enabled = false;
                 playerVisual.transform.GetChild(2).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                 break;
+            default:
+                break;
         }
     }
-
-    [ServerRpc]
-    private void DespawnPlayerServerRpc() {
-        GetComponent<NetworkObject>().Despawn();
-    }
-}
-
-public enum PlayerDisplayState {
-    show,
-    hide
 }
