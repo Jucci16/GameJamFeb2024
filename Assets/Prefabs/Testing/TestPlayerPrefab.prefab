@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 7967690017409705448}
   - component: {fileID: 203704498997827441}
   - component: {fileID: 1453049320508413215}
+  - component: {fileID: 4551993009430523077}
   - component: {fileID: 7268804457145310386}
   - component: {fileID: 5044481669652631412}
   - component: {fileID: 1153084200806515910}
@@ -231,9 +232,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91981a32c37b2b46a8c94166b6ac32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  overridePlayerId: 
   _explosionPrefab: {fileID: 2976218027330178980, guid: 3a8ce0aef05f1054290ab76df22c7305,
     type: 3}
+--- !u!114 &4551993009430523077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7090444979680509126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4620490d1f2c47438163cd459882946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!54 &7268804457145310386
 Rigidbody:
   m_ObjectHideFlags: 0

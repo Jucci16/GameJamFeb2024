@@ -40,14 +40,10 @@ public class MultiplayTestSceneManager : NetworkBehaviour
     private void CumulativeLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
         MultiplayerManager.Instance.ResetPlayersForNewMatch();
-        int clientIndex = 0;
         foreach(var clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {   
-            var spawnPosition = playerSpawnPositions[clientIndex];
-            var targetAngle = TransformUtils.GetYRotFromVec(new Vector2(0f,0f), new Vector2(spawnPosition.x, spawnPosition.z));
-            var player = Instantiate(_playerPrefab, spawnPosition, Quaternion.Euler(0, targetAngle, 0));
+            var player = Instantiate(_playerPrefab);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
-            clientIndex++;
         }
     }
 
