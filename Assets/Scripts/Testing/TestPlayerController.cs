@@ -206,7 +206,7 @@ public class TestPlayerController : NetworkBehaviour
                 Vector3 explosionForwardOffset = transform.rotation * Vector3.forward * (playerHeadObjectWidth * 0.7f);
                 Quaternion playerRotation = transform.rotation;
 
-                SpawnProjectileServerRpc(_playerData.PlayerId.ToString(), launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
+                SpawnProjectileServerRpc(launchPosition, forwardOffset, explosionForwardOffset, playerRotation);
 
                 // Add recoil to the tank
                 var direction = transform.forward * -1;
@@ -221,12 +221,11 @@ public class TestPlayerController : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void SpawnProjectileServerRpc(string shotByPlayerId, Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
+    private void SpawnProjectileServerRpc(Vector3 launchPosition, Vector3 forwardOffset, Vector3 explosionForwardOffset, Quaternion playerRotation)
     {
         var projectile = Instantiate(_projectilePrefab, launchPosition + forwardOffset, playerRotation);
         var projectileScript = projectile.GetComponent<ShellProjectile>();
-        projectileScript.SetOriginPlayerId(shotByPlayerId);
-        projectile.GetComponent<NetworkObject>().Spawn();
+        projectile.GetComponent<NetworkObject>().SpawnWithOwnership(_playerData.ClientId);
         StartCoroutine(StartProjectileDespawnTimer(projectileScript));
         var explosion = Instantiate(_projectileExplosionPrefab, launchPosition + explosionForwardOffset, transform.rotation);
         explosion.GetComponent<NetworkObject>().Spawn();

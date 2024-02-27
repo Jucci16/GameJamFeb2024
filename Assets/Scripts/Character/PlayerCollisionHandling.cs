@@ -5,11 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerCollisionHandling : NetworkBehaviour
-{   
-    [SerializeField]
-    // Used for testing purposes only.
-    public string overridePlayerId = null;
-
+{ 
     [SerializeField]
     private GameObject _explosionPrefab; 
 
@@ -27,8 +23,7 @@ public class PlayerCollisionHandling : NetworkBehaviour
             {
                 var projectileObject = projectile.gameObject.GetComponent<IProjectile>();
                 // Only take action if the bullet was not shot by the current player
-                string playerId = string.IsNullOrEmpty(overridePlayerId) ? _playerData.PlayerId.ToString() : overridePlayerId;
-                if(projectileObject.originPlayerId != playerId) {
+                if(!projectile.gameObject.GetComponent<NetworkObject>().IsOwner) {
                     KaboomServerRpc(projectile.gameObject);
                 }
             }
