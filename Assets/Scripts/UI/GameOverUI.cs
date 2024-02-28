@@ -16,18 +16,31 @@ public class GameOverUI : NetworkBehaviour
     
     [SerializeField] 
     private Button _spectateButton;
+    
+    [SerializeField] 
+    private Button _spectatorBackButton;
 
     private void Awake() {
         Instance = this;
         _mainMenuButton.onClick.AddListener(async () => { 
-            await UnityLobbyManager.Instance.LeaveLobby();
-            LevelLoader.Load(LevelEnum.MainMenuScene); 
+            if(IsServer) {
+                GameOverHostWarningUI.Instance.Show();
+            } else {
+                await UnityLobbyManager.Instance.LeaveLobby();
+                LevelLoader.Load(LevelEnum.MainMenuScene); 
+            }
         });
-        _spectateButton.onClick.AddListener(async () => { 
+        _spectateButton.onClick.AddListener(() => { 
             Hide();
+            _spectatorBackButton.gameObject.SetActive(true);
+        });
+        _spectatorBackButton.onClick.AddListener(() => { 
+            gameObject.SetActive(true);
+            _spectatorBackButton.gameObject.SetActive(false);
         });
         _mainMenuButton.gameObject.SetActive(false);
         _spectateButton.gameObject.SetActive(false);
+        _spectatorBackButton.gameObject.SetActive(false);
     }
 
     private void Start()
@@ -52,11 +65,13 @@ public class GameOverUI : NetworkBehaviour
                 break;
         }
         gameObject.SetActive(true);
+        MatchUIManager.instance.Hide();
+        RespawnCountdown.Instance.Hide();
         Invoke("showActionButtons", 1);
     }
 
     private void showActionButtons() {
-        if(!IsServer) _mainMenuButton.gameObject.SetActive(true);
+        _mainMenuButton.gameObject.SetActive(true);
         _spectateButton.gameObject.SetActive(true);
     }
 

@@ -86,8 +86,6 @@ public class MatchUIManager : MonoBehaviour
         _livesRemainingIcons.Remove(endIcon);
         Destroy(endIcon);
         if(_livesRemainingIcons.Count == 0) {
-            Hide();
-            RespawnCountdown.Instance.Hide();
             GameOverUI.Instance.Show(GameOverStatus.loser);
             return true;
         }

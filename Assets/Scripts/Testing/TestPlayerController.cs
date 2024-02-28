@@ -4,6 +4,12 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum PlayerDisplayState {
+    show,
+    pause,
+    hide
+}
+
 public class TestPlayerController : NetworkBehaviour
 {
     private const int playerHeadIndex = 0;
@@ -89,7 +95,10 @@ public class TestPlayerController : NetworkBehaviour
         _playerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
         var playerColor = MultiplayerManager.Instance.GetPlayerColor(_playerData.ColorId);
         _playerVisual.SetPlayerColor(playerColor);
-        if (IsOwner) MatchUIManager.instance.SetPlayerColor(playerColor);
+        if (IsOwner) {
+            MatchUIManager.instance.SetPlayerColor(playerColor);
+            InvokeRepeating("CheckIfPlayerWon", 1f, 1f);
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -237,6 +246,14 @@ public class TestPlayerController : NetworkBehaviour
         yield return new WaitForSeconds(3);
         if(!projectile.isDestroyed) {
             projectile.DespawnServerRpc();
+        }
+    }
+
+    private void CheckIfPlayerWon() {
+        if(MultiplayerManager.Instance.DidPlayerWinMatch(OwnerClientId)){
+            CancelInvoke("CheckIfPlayerWon");
+            state = PlayerDisplayState.pause;
+            GameOverUI.Instance.Show(GameOverStatus.winner);
         }
     }
 }

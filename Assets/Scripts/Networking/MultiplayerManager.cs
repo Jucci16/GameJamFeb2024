@@ -250,4 +250,43 @@ public class MultiplayerManager : NetworkBehaviour
 
         return 0;
     }
+
+    public void ResetPlayersForNewMatch() {
+        // clear existing listeners for player list
+        OnPlayerDataListChanged = null;
+        
+        for(var i = 0; i < _playerDataList.Count; i++) {
+            var playerData = _playerDataList[i];
+            playerData.MatchState = PlayerMatchState.active;
+            _playerDataList[i] = playerData;
+        }
+    }
+
+    public bool DidPlayerWinMatch(ulong playerClientId) {
+        bool playerIsAlive = true;
+        bool allOtherPlayersDead = true;
+        foreach(var playerData in _playerDataList) {
+            if(playerData.ClientId == playerClientId) {
+                playerIsAlive = playerData.MatchState == PlayerMatchState.active;
+            }
+            else {
+                if(playerData.MatchState == PlayerMatchState.active) {
+                    allOtherPlayersDead = false;
+                }
+            }
+        }
+        return playerIsAlive && allOtherPlayersDead;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PlayerGameOverServerRpc(NetworkObjectReference playerObject, ServerRpcParams serverRpcParams = default) {
+        // Despawn player object
+        ((GameObject) playerObject).GetComponent<NetworkObject>().Despawn();
+        
+        // Update player match state to "gameOver"
+        var playerDataIndex = GetPlayerIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+        var playerData = _playerDataList[playerDataIndex];
+        playerData.MatchState = PlayerMatchState.gameOver;
+        _playerDataList[playerDataIndex] = playerData;
+    }
 }

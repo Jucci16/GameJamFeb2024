@@ -11,6 +11,8 @@ public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
     public int ColorId;
     public FixedString64Bytes PlayerName;
     public FixedString64Bytes PlayerId;
+    public PlayerMatchState MatchState;
+    
 
     public bool Equals(PlayerData other)
     {
@@ -18,7 +20,8 @@ public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
             ClientId == other.ClientId &&
             ColorId == other.ColorId &&
             PlayerName == other.PlayerName &&
-            PlayerId == other.PlayerId;
+            PlayerId == other.PlayerId &&
+            MatchState == other.MatchState;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -26,6 +29,12 @@ public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
         serializer.SerializeValue(ref ClientId);
         serializer.SerializeValue(ref ColorId);
         serializer.SerializeValue(ref PlayerName);
-        serializer.SerializeValue(ref PlayerId);
+        serializer.SerializeValue(ref PlayerId); 
+        serializer.SerializeValue(ref MatchState); 
     }
+}
+
+public enum PlayerMatchState {
+    active,
+    gameOver
 }
