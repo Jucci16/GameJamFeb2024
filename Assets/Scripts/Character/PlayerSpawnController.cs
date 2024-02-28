@@ -2,13 +2,28 @@ using Unity.Netcode;
 using Unity.Collections;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerSpawnController : NetworkBehaviour
 {
-    void Start()
+    private static Vector3 player1SpawnPosition = new Vector3(-25f, 0.5f, 0f);
+    private static Vector3 player2SpawnPosition = new Vector3(25f, 0.5f, 0f);
+    private static Vector3 player3SpawnPosition = new Vector3(0f, 0.5f, -25f);
+    private static Vector3 player4SpawnPosition = new Vector3(0f, 0.5f, 25f);
+    private static Vector3 player5SpawnPosition = new Vector3(30f, 0.5f, 30f);
+    public static List<Vector3> playerSpawnPositions = new List<Vector3>{
+        player1SpawnPosition, 
+        player2SpawnPosition, 
+        player3SpawnPosition, 
+        player4SpawnPosition, 
+        player5SpawnPosition
+    };
+
+    public override void OnNetworkSpawn()
     {
-        // Set initial spawn position
+        // Set initial spawn position (for Owner)
         ResetPlayerPosition(true);
+        base.OnNetworkSpawn();
     }
 
     public IEnumerator StartPlayerRespawnTimer() {
@@ -32,8 +47,8 @@ public class PlayerSpawnController : NetworkBehaviour
     private void ResetPlayerPosition(bool isInitialSpawn = false) {
         if(IsOwner) {
             System.Random r = new System.Random();
-            int spawnIndex = isInitialSpawn ? (int)OwnerClientId : r.Next(0, MultiplayTestSceneManager.playerSpawnPositions.Count);
-            var spawnPosition = MultiplayTestSceneManager.playerSpawnPositions[spawnIndex];
+            int spawnIndex = isInitialSpawn ? (int)OwnerClientId : r.Next(0, playerSpawnPositions.Count);
+            var spawnPosition = playerSpawnPositions[spawnIndex];
             var targetAngle = TransformUtils.GetYRotFromVec(new Vector2(0f,0f), new Vector2(spawnPosition.x, spawnPosition.z));
             gameObject.transform.position = spawnPosition;
             gameObject.transform.rotation = Quaternion.Euler(0, targetAngle, 0);
